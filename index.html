@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的博客</title>
+<style>
+:root {
+--bg: #faf8f5;
+--card-bg: #fff;
+--text: #333;
+--text-light: #888;
+--accent: #6b9080;
+--accent-light: #a4c3b2;
+--danger: #e07a5f;
+--border: #e8e4df;
+--shadow: 0 1px 3px rgba(0,0,0,.06);
+--shadow-hover: 0 4px 16px rgba(0,0,0,.1);
+--radius: 12px;
+--max-width: 720px;
+--nav-height: 56px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+font-family: 'KaiTi', 'STKaiti', '楷体', 'FangSong', 'STFangsong', '仿宋', serif;
+background: var(--bg);
+color: var(--text);
+line-height: 1.8;
+font-size: 17px;
+-webkit-font-smoothing: antialiased;
+}
+
+body.font-kai { font-family: 'KaiTi', 'STKaiti', '楷体', serif; }
+body.font-song { font-family: 'Songti SC', 'STSong', '宋体', 'SimSun', serif; }
+body.font-sans { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', '微软雅黑', sans-serif; }
+body.font-hei { font-family: 'SimHei', 'Microsoft YaHei', '黑体', 'Microsoft JhengHei', sans-serif; }
+body.font-fangsong { font-family: 'FangSong', 'STFangsong', '仿宋', serif; }
+body.font-dengxian { font-family: 'DengXian', '等线', 'Microsoft YaHei', sans-serif; }
+body.font-lishu { font-family: 'LiSu', '隶书', 'STLiti', serif; }
+
+/* ===== Navigation ===== */
+nav {
+position: fixed; top: 0; left: 0; right: 0; height: var(--nav-height);
+background: rgba(250,248,245,.85); backdrop-filter: blur(12px);
+-webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);
+z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+}
+
+nav .brand { font-size: 20px; font-weight: bold; color: var(--text); cursor: pointer; user-select: none; }
+nav .links { display: flex; gap: 4px; align-items: center; }
+nav .links a { text-decoration: none; color: var(--text-light); font-size: 15px; padding: 6px 14px; border-radius: 8px; transition: all .2s; cursor: pointer; }
+nav .links a:hover, nav .links a.active { color: var(--accent); background: rgba(107,144,128,.08); }
+nav .links a.admin-link { color: var(--danger); font-size: 13px; opacity: .7; }
+nav .links a.admin-link:hover { opacity: 1; background: rgba(224,122,95,.08); }
+
+.search-icon { cursor: pointer; font-size: 18px; color: var(--text-light); padding: 6px; border-radius: 8px; transition: all .2s; display: flex; align-items: center; }
+.search-icon:hover { color: var(--accent); background: rgba(107,144,128,.08); }
+.search-box { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 0; overflow: hidden; transition: width .3s; background: var(--card-bg); border-radius: 8px; }
+.search-box.open { width: 220px; border: 1px solid var(--border); }
+.search-box input { width: 100%; border: none; outline: none; padding: 8px 14px; font-size: 15px; background: transparent; color: var(--text); font-family: inherit; }
+
+.font-switcher { font-size: 13px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--card-bg); cursor: pointer; font-family: inherit; color: var(--text-light); transition: all .2s; }
+.font-switcher:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ===== Layout ===== */
+main { max-width: var(--max-width); margin: 0 auto; padding: calc(var(--nav-height) + 32px) 24px 60px; }
+section { display: none; }
+section.active { display: block; }
+
+/* ===== Home: Post Cards ===== */
+.post-card { background: var(--card-bg); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 16px; box-shadow: var(--shadow); cursor: pointer; transition: all .25s; border: 1px solid transparent; animation: fadeIn .4s ease both; }
+.post-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); border-color: var(--border); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.post-card .meta { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; font-size: 13px; color: var(--text-light); }
+.post-card .category { background: rgba(107,144,128,.12); color: var(--accent); padding: 2px 10px; border-radius: 4px; font-size: 12px; }
+.post-card .status-draft { background: rgba(224,122,95,.12); color: var(--danger); padding: 2px 10px; border-radius: 4px; font-size: 12px; }
+.post-card h2 { font-size: 20px; margin-bottom: 8px; font-weight: 600; color: var(--text); }
+.post-card .summary { font-size: 15px; color: var(--text-light); line-height: 1.6; }
+
+/* ===== Pagination ===== */
+.pagination { display: flex; justify-content: center; gap: 8px; margin-top: 32px; }
+.pagination button { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 14px; cursor: pointer; color: var(--text); transition: all .2s; font-family: inherit; }
+.pagination button:hover { border-color: var(--accent); color: var(--accent); }
+.pagination button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.pagination button:disabled { opacity: .4; cursor: default; }
+
+/* ===== Post Detail ===== */
+.post-detail .back-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 15px; color: var(--accent); cursor: pointer; margin-bottom: 24px; padding: 6px 12px; border-radius: 6px; transition: background .2s; border: none; background: none; font-family: inherit; }
+.post-detail .back-btn:hover { background: rgba(107,144,128,.08); }
+.admin-actions { display: flex; gap: 8px; margin-bottom: 16px; }
+.admin-actions button { font-size: 13px; padding: 4px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--card-bg); cursor: pointer; font-family: inherit; transition: all .2s; }
+.admin-actions button:hover { border-color: var(--accent); color: var(--accent); }
+.admin-actions button.danger:hover { border-color: var(--danger); color: var(--danger); }
+.post-detail h1 { font-size: 28px; margin-bottom: 12px; line-height: 1.4; }
+.post-detail .post-meta { font-size: 14px; color: var(--text-light); margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+.post-detail .post-body { font-size: 17px; line-height: 1.9; }
+.post-detail .post-body p { margin-bottom: 16px; }
+.post-detail .post-body img { max-width: 100%; border-radius: 8px; margin: 20px 0; }
+.post-detail .post-body h2 { font-size: 22px; margin: 32px 0 12px; }
+.post-detail .post-body h3 { font-size: 19px; margin: 24px 0 10px; }
+.post-detail .post-body blockquote { border-left: 3px solid var(--accent); padding-left: 16px; color: var(--text-light); margin: 16px 0; }
+
+/* ===== Album ===== */
+.album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+.album-item { border-radius: 8px; overflow: hidden; cursor: pointer; aspect-ratio: 4/3; background: var(--card-bg); position: relative; transition: transform .25s; }
+.album-item:hover { transform: scale(1.03); }
+.album-item img { width: 100%; height: 100%; object-fit: cover; }
+.album-empty { text-align: center; color: var(--text-light); padding: 60px 0; font-size: 16px; }
+
+/* ===== Lightbox ===== */
+.lightbox-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 200; display: none; align-items: center; justify-content: center; cursor: pointer; }
+.lightbox-overlay.open { display: flex; }
+.lightbox-overlay img { max-width: 90vw; max-height: 85vh; border-radius: 4px; box-shadow: 0 8px 40px rgba(0,0,0,.4); }
+.lightbox-close { position: absolute; top: 20px; right: 28px; color: #fff; font-size: 32px; cursor: pointer; opacity: .7; transition: opacity .2s; }
+.lightbox-close:hover { opacity: 1; }
+.lightbox-prev, .lightbox-next { position: absolute; top: 50%; transform: translateY(-50%); color: #fff; font-size: 36px; cursor: pointer; opacity: .6; transition: opacity .2s; padding: 16px; user-select: none; }
+.lightbox-prev:hover, .lightbox-next:hover { opacity: 1; }
+.lightbox-prev { left: 12px; } .lightbox-next { right: 12px; }
+
+/* ===== Archive ===== */
+.archive-group { margin-bottom: 32px; }
+.archive-year { font-size: 22px; font-weight: 600; color: var(--accent); margin-bottom: 12px; }
+.archive-item { display: flex; align-items: baseline; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: all .2s; }
+.archive-item:hover { color: var(--accent); }
+.archive-date { font-size: 13px; color: var(--text-light); flex-shrink: 0; width: 50px; }
+.archive-title { font-size: 16px; }
+
+/* ===== About ===== */
+.about-section { text-align: center; padding: 20px 0; }
+.about-avatar { width: 100px; height: 100px; border-radius: 50%; background: var(--accent-light); margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #fff; }
+.about-section h2 { margin-bottom: 8px; }
+.about-section .bio { color: var(--text-light); max-width: 400px; margin: 0 auto 24px; font-size: 15px; }
+.about-links { display: flex; gap: 16px; justify-content: center; }
+.about-links a { color: var(--accent); text-decoration: none; font-size: 15px; padding: 6px 16px; border: 1px solid var(--accent); border-radius: 20px; transition: all .2s; }
+.about-links a:hover { background: var(--accent); color: #fff; }
+
+/* ===== Admin Panel ===== */
+.admin-login { text-align: center; padding: 60px 20px; }
+.admin-login h2 { margin-bottom: 16px; }
+.admin-login input { font-size: 16px; padding: 10px 16px; border: 1px solid var(--border); border-radius: 8px; width: 240px; font-family: inherit; outline: none; }
+.admin-login input:focus { border-color: var(--accent); }
+.admin-login .btn { font-size: 16px; padding: 10px 24px; background: var(--accent); color: #fff; border: none; border-radius: 8px; cursor: pointer; margin-left: 8px; font-family: inherit; transition: opacity .2s; }
+.admin-login .btn:hover { opacity: .85; }
+.admin-login .error { color: var(--danger); margin-top: 12px; font-size: 14px; }
+
+.login-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 24px; }
+.login-tab { font-size: 15px; padding: 8px 20px; border: 1px solid var(--border); border-radius: 8px; background: var(--card-bg); cursor: pointer; font-family: inherit; color: var(--text); transition: all .2s; }
+.login-tab:hover { border-color: var(--accent); color: var(--accent); }
+.login-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.admin-dashboard h2 { margin-bottom: 20px; }
+.toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.toolbar .btn { font-size: 14px; padding: 8px 18px; background: var(--accent); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; transition: opacity .2s; }
+.toolbar .btn:hover { opacity: .85; }
+.toolbar .btn-outline { background: var(--card-bg); color: var(--text); border: 1px solid var(--border); }
+.toolbar .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+.admin-post-list { margin-bottom: 24px; }
+.admin-post-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--card-bg); border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border); }
+.admin-post-item .info { flex: 1; min-width: 0; }
+.admin-post-item .title { font-size: 16px; font-weight: 600; cursor: pointer; }
+.admin-post-item .title:hover { color: var(--accent); }
+.admin-post-item .meta { font-size: 13px; color: var(--text-light); }
+.admin-post-item .actions { display: flex; gap: 6px; flex-shrink: 0; }
+.admin-post-item .actions button { font-size: 13px; padding: 4px 10px; border-radius: 5px; border: 1px solid var(--border); background: var(--card-bg); cursor: pointer; font-family: inherit; transition: all .2s; }
+.admin-post-item .actions button:hover { border-color: var(--accent); color: var(--accent); }
+.admin-post-item .actions button.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+.admin-stats { margin-bottom: 20px; color: var(--text-light); font-size: 14px; }
+.admin-stats span { margin-right: 16px; }
+
+/* ===== Editor ===== */
+.editor-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 300; display: none; align-items: flex-start; justify-content: center; padding-top: 30px; overflow-y: auto; }
+.editor-overlay.open { display: flex; }
+.editor-panel { background: var(--card-bg); border-radius: var(--radius); width: 90%; max-width: 800px; padding: 32px; box-shadow: 0 8px 40px rgba(0,0,0,.15); margin-bottom: 40px; }
+.editor-panel h3 { margin-bottom: 20px; font-size: 22px; }
+.editor-field { margin-bottom: 14px; }
+.editor-field label { display: block; font-size: 14px; color: var(--text-light); margin-bottom: 4px; font-weight: 600; }
+.editor-field input, .editor-field select { width: 100%; font-size: 16px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; outline: none; background: var(--bg); }
+.editor-field input:focus, .editor-field select:focus { border-color: var(--accent); }
+.editor-field textarea { width: 100%; font-size: 16px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; outline: none; resize: vertical; min-height: 80px; background: var(--bg); }
+.editor-field textarea:focus { border-color: var(--accent); }
+
+.tag-input-wrap { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); min-height: 42px; cursor: text; }
+.tag-input-wrap:focus-within { border-color: var(--accent); }
+.tag-chip { background: rgba(107,144,128,.12); color: var(--accent); padding: 2px 8px; border-radius: 4px; font-size: 13px; display: inline-flex; align-items: center; gap: 4px; }
+.tag-chip .remove { cursor: pointer; opacity: .6; font-size: 16px; line-height: 1; }
+.tag-chip .remove:hover { opacity: 1; }
+.tag-input-wrap input { border: none; outline: none; flex: 1; min-width: 80px; font-size: 14px; background: transparent; font-family: inherit; padding: 4px; }
+
+.rt-toolbar { display: flex; gap: 4px; margin-bottom: 8px; padding: 8px; background: var(--bg); border-radius: 8px; flex-wrap: wrap; align-items: center; }
+.rt-toolbar button { font-size: 14px; padding: 4px 10px; border: 1px solid transparent; border-radius: 4px; background: transparent; cursor: pointer; font-family: inherit; color: var(--text); }
+.rt-toolbar button:hover { background: var(--card-bg); border-color: var(--border); }
+.rt-toolbar .sep { width: 1px; background: var(--border); margin: 0 4px; height: 24px; }
+
+.rt-body { min-height: 200px; max-height: 400px; overflow-y: auto; padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); font-size: 16px; line-height: 1.8; outline: none; }
+.rt-body:focus { border-color: var(--accent); }
+.rt-body img { max-width: 100%; border-radius: 6px; margin: 10px 0; }
+.rt-body blockquote { border-left: 3px solid var(--accent); padding-left: 12px; color: var(--text-light); margin: 10px 0; }
+.rt-body h2 { font-size: 20px; margin: 16px 0 8px; }
+.rt-body h3 { font-size: 17px; margin: 12px 0 6px; }
+
+.img-upload-area { border: 2px dashed var(--border); border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: all .2s; margin-top: 8px; }
+.img-upload-area:hover { border-color: var(--accent); background: rgba(107,144,128,.04); }
+.img-upload-area .hint { color: var(--text-light); font-size: 14px; }
+.img-upload-area img { max-width: 200px; max-height: 150px; border-radius: 6px; margin-top: 10px; }
+
+.editor-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
+.editor-actions button { font-size: 15px; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-family: inherit; transition: all .2s; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); }
+.editor-actions button:hover { border-color: var(--accent); color: var(--accent); }
+.editor-actions button.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.editor-actions button.btn-primary:hover { opacity: .85; }
+.editor-actions button.btn-danger { color: var(--danger); }
+.editor-actions button.btn-danger:hover { border-color: var(--danger); background: rgba(224,122,95,.06); }
+
+/* Toast */
+.toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; padding: 12px 24px; border-radius: 8px; font-size: 15px; z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+.toast.error { background: var(--danger); }
+
+mark { background: rgba(107,144,128,.2); color: var(--text); padding: 1px 4px; border-radius: 2px; }
+footer { text-align: center; padding: 32px 24px; color: var(--text-light); font-size: 13px; border-top: 1px solid var(--border); max-width: var(--max-width); margin: 0 auto; }
+
+@media (max-width: 600px) {
+nav { padding: 0 14px; }
+nav .links a { font-size: 13px; padding: 5px 8px; }
+nav .brand { font-size: 17px; }
+.post-card { padding: 18px 20px; }
+.post-card h2 { font-size: 18px; }
+.post-detail h1 { font-size: 23px; }
+.album-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.search-box.open { width: 160px; }
+.font-switcher { font-size: 12px; padding: 3px 8px; }
+.editor-panel { padding: 20px; width: 96%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+.post-card { animation: none; }
+* { transition-duration: 0s !important; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+<span class="brand" onclick="navigate('home')">静默小筑</span>
+<div class="links" style="position:relative">
+<a onclick="navigate('home')" data-page="home">首页</a>
+<a onclick="navigate('album')" data-page="album">相册</a>
+<a onclick="navigate('about')" data-page="about">关于</a>
+<a onclick="navigate('archive')" data-page="archive">归档</a>
+<span class="search-wrap">
+<span class="search-icon" onclick="toggleSearch()" title="搜索">🔍</span>
+<span class="search-box" id="searchBox">
+<input type="text" id="searchInput" placeholder="搜索文章…" oninput="doSearch()">
+</span>
+</span>
+<button class="font-switcher" onclick="switchFont()" title="切换字体">字体</button>
+<span id="roleBadge" style="display:none;font-size:12px;background:var(--accent);color:#fff;padding:2px 10px;border-radius:4px;margin-right:0"></span>
+<a class="admin-link" onclick="navigate('admin')" data-page="admin">管理</a>
+</div>
+</nav>
+
+<main>
+<section id="home" class="active">
+<div id="postList"></div>
+<div class="pagination" id="pagination"></div>
+</section>
+
+<section id="post-detail" class="post-detail"></section>
+
+<section id="album">
+<div class="album-grid" id="albumGrid"></div>
+<div class="album-empty" id="albumEmpty" style="display:none">还没有带图片的文章 🖼️</div>
+</section>
+
+<section id="about">
+<div class="about-section" id="aboutContent"></div>
+</section>
+
+<section id="archive">
+<div id="archiveList"></div>
+</section>
+
+<!-- Admin / Login Section -->
+<section id="admin">
+  <div class="admin-login" id="adminLogin">
+    <div class="login-tabs">
+      <button class="login-tab active" id="tabAdmin" onclick="showLoginTab('admin')">🔐 管理员登录</button>
+      <button class="login-tab" id="tabGuest" onclick="showLoginTab('guest')">👤 游客浏览</button>
+    </div>
+    <div id="adminLoginForm">
+      <h2>管理员登录</h2>
+      <input type="password" id="adminPassword" placeholder="输入管理密码" onkeydown="if(event.key==='Enter')adminLogin()">
+      <button class="btn" onclick="adminLogin()">登录</button>
+      <p class="error" id="loginError"></p>
+    </div>
+    <div id="guestLoginForm" style="display:none">
+      <h2>👤 游客模式</h2>
+      <p style="color:var(--text-light);margin:0 auto 20px;max-width:320px;font-size:15px">以游客身份浏览博客，仅可查看公开内容，不能管理文章。</p>
+      <button class="btn" onclick="guestLogin()" style="margin-left:0">进入博客</button>
+    </div>
+  </div>
+  <div class="admin-dashboard" id="adminDashboard" style="display:none">
+    <div id="guestInfo" style="display:none;text-align:center;padding:40px 20px">
+      <h2>👤 游客模式</h2>
+      <p style="color:var(--text-light);margin:12px 0 24px;font-size:15px">你正在以游客身份浏览，只能查看公开内容。</p>
+      <button class="btn btn-outline" onclick="logout()" style="display:inline-block;margin:0">退出登录</button>
+    </div>
+    <div id="adminPanel">
+      <h2>📝 文章管理</h2>
+      <div class="admin-stats">
+        <span>总计: <strong id="statTotal">0</strong> 篇</span>
+        <span>已发布: <strong id="statPublished">0</strong> 篇</span>
+        <span>草稿: <strong id="statDrafts">0</strong> 篇</span>
+      </div>
+      <div class="toolbar">
+        <button class="btn" onclick="openEditor()">✏️ 写新文章</button>
+        <button class="btn btn-outline" onclick="openAboutEditor()">👤 关于页面</button>
+        <button class="btn btn-outline" onclick="openPasswordEditor()">🔑 修改密码</button>
+        <button class="btn btn-outline" onclick="exportData()">📥 导出数据</button>
+        <button class="btn btn-outline" onclick="importData()">📤 导入数据</button>
+        <button class="btn btn-outline" style="color:var(--danger)" onclick="resetAllData()">🗑️ 清空数据</button>
+      </div>
+      <div class="admin-post-list" id="adminPostList"></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer><p>© 2026 静默小筑 · 用心记录</p></footer>
+
+<!-- Lightbox -->
+<div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+<span class="lightbox-close">&times;</span>
+<span class="lightbox-prev" onclick="event.stopPropagation();prevImage()">‹</span>
+<img id="lightboxImg" src="" alt="">
+<span class="lightbox-next" onclick="event.stopPropagation();nextImage()">›</span>
+</div>
+
+<!-- Editor Overlay -->
+<div class="editor-overlay" id="editorOverlay">
+<div class="editor-panel" id="editorPanel"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Hidden file input for import -->
+<input type="file" id="importFile" style="display:none" accept=".json" onchange="handleImport(event)">
+
+<script>
+// ===== Data Store =====
+const STORAGE_KEY = 'blog_posts';
+const ADMIN_PW_KEY = 'blog_admin_pw';
+const DEFAULT_PW = 'admin123';
+
+// Initialize admin password
+if (!localStorage.getItem(ADMIN_PW_KEY)) {
+localStorage.setItem(ADMIN_PW_KEY, DEFAULT_PW);
+}
+
+// Default posts
+const DEFAULT_POSTS = [
+{id:1,title:'开始写博客的第一天',date:'2026-06-18',category:'随笔',tags:['生活','开始'],status:'published',
+summary:'一直想有一个自己的小空间，用来记录日常的思考和发现。今天终于动手了。',
+content:'<p>一直想有一个自己的小空间，用来记录日常的思考和发现。今天终于动手了。</p><p>选择了一个极简的样式——浅色的背景，楷体的文字，没有多余的装饰。就像一间安静的书房，需要的是简单的桌椅和充足的光线，而不是琳琅满目的摆设。</p><h2>为什么是博客</h2><p>在这个短视频和碎片信息泛滥的时代，写一篇长文似乎成了一件奢侈的事。但正是这种"奢侈"，让写作本身变成了一种梳理和沉淀。</p><blockquote>写作不是为了被阅读，而是为了被思考。</blockquote><h2>接下来</h2><p>会在这里分享一些技术笔记、读书摘录，偶尔也写写拍到的照片。不求更新频繁，但求每一篇都是认真写下的。</p><p>如果你正好路过这里，欢迎停留片刻 🌿</p>',hasImage:false,imageUrl:null},
+{id:2,title:'午后散步拍的花',date:'2026-06-15',category:'摄影',tags:['摄影','自然','花卉'],status:'published',
+summary:'小区楼下不知名的花开了一整片，午后的阳光穿过花瓣，透出暖黄的光。',
+content:'<p>小区楼下不知名的花开了一整片。午后的阳光穿过花瓣，透出暖黄的光。</p><p>用手机随手拍了几张，没有调色，没有裁剪，就保持它们本来的样子。</p><img src="https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=800" alt="花卉"><p>有时候觉得，美就在这些不经意的角落里。不需要刻意去寻找，只需要在走路的时候抬一抬头。</p><h2>拍摄小记</h2><p>光线：下午三点，西侧斜射光，天然暖色调。</p><p>器材：手机，人像模式。</p><p>心得：拍花的时候，蹲下来，把镜头放到和花同一个高度。这样拍出来的照片有"置身其中"的感觉。</p>',hasImage:true,imageUrl:'https://images.unsplash.com/photo-1490750967868-88aa4f44baee?w=800'},
+{id:3,title:'读《活着》有感',date:'2026-06-10',category:'读书',tags:['读书','文学','余华'],status:'published',
+summary:'重读余华的《活着》，和十几岁时读的感受完全不同。人活着，本身就是一种力量。',
+content:'<p>重读余华的《活着》，和十几岁时读的感受完全不同。</p><p>那时候觉得这本书太苦了，苦得读不下去。现在再读，却读出了一种平静的力量——不是对抗命运的顽强，而是接纳一切的坦然。</p><h2>几个片段</h2><p>福贵失去所有亲人之后，和一头老牛在田里慢慢走。没有怨天尤人，没有悲愤交加，只是活着。这种"活着"不是苟且，而是一种朴素的生命力。</p><p>余华的文字很淡，几乎没有形容词，像白描一样一笔一笔地勾勒。但正是这种淡，让人读完以后心里沉甸甸的。</p><blockquote>人是为了活着本身而活着，而不是为了活着之外的任何事物而活着。</blockquote><p>也许这就是这本书想说的：活着不需要理由。</p>',hasImage:false,imageUrl:null},
+{id:4,title:'夏天傍晚的天空',date:'2026-06-05',category:'摄影',tags:['摄影','天空','夏天'],status:'published',
+summary:'夏天的傍晚是一天里最温柔的时刻。天空从橙红渐变到粉紫，再慢慢暗成深蓝。',
+content:'<p>夏天的傍晚是一天里最温柔的时刻。天空从橙红渐变到粉紫，再慢慢暗成深蓝。</p><img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800" alt="傍晚天空"><p>站在阳台上看了一会儿，空气里有晚饭的味道，远处传来隐约的蝉鸣。这样的时刻让人不想说话。</p><p>拿出相机拍了几张。快门声在安静的傍晚里显得格外清脆。</p>',hasImage:true,imageUrl:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800'},
+{id:5,title:'如何搭建一个简单的博客',date:'2026-05-28',category:'技术',tags:['技术','博客','HTML'],status:'published',
+summary:'不需要服务器，不需要数据库，一个纯 HTML 文件就能拥有自己的博客。这里记录一下搭建过程。',
+content:'<p>搭建一个博客，听起来很复杂，但其实可以简单到只有一个 HTML 文件。</p><h2>为什么是纯静态</h2><p>对于个人博客来说，大部分时候只需要展示内容，不需要用户注册、评论等动态功能。这种情况下，纯静态方案是最轻量的选择。</p><p>✅ 不需要服务器<br>✅ 不需要数据库<br>✅ 加载速度快<br>✅ 可以托管在 GitHub Pages 等免费平台</p><h2>核心思路</h2><p>把文章数据放在一个 JavaScript 数组里，然后用 JavaScript 渲染页面。切换"页面"其实就是隐藏和显示不同的 HTML 区块。</p><p>发布新文章只需要：在数组里添加一条数据，格式参照已有的文章即可。</p>',hasImage:false,imageUrl:null},
+{id:6,title:'图书馆的一个下午',date:'2026-05-20',category:'随笔',tags:['生活','读书'],status:'published',
+summary:'周末去了市图书馆，人不多，阳光从大窗户斜照进来，照在旧书的纸张上，有一种特别的质感。',
+content:'<p>周末去了市图书馆。人不多，阳光从大窗户斜照进来，照在旧书的纸张上，有一种特别的质感。</p><p>挑了一个靠窗的位置坐下，随手拿了一本《海子的诗》。翻到那句——</p><blockquote>面朝大海，春暖花开</blockquote><p>突然觉得，图书馆是一个时间和空间都变得缓慢的地方。外面马路上车来车往，里面只有翻书的声音。</p><p>待了两个多小时，临走借了三本书。一本诗集，一本散文，一本关于摄影的图册。</p>',hasImage:false,imageUrl:null},
+{id:7,title:'城市街角的咖啡店',date:'2026-06-01',category:'摄影',tags:['摄影','城市','咖啡'],status:'published',
+summary:'在老城区发现一家藏在巷子深处的咖啡店，门口的绿植和木招牌让人忍不住停下来。',
+content:'<p>在老城区发现一家藏在巷子深处的咖啡店，门口的绿植和木招牌让人忍不住停下来。</p><img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800" alt="咖啡店"><p>点了一杯拿铁，坐在靠窗的位置。窗户是老式的木框窗，推开能看到巷子里来来往往的人。</p><p>店里放的是爵士乐，音量刚好，不会打扰看书的人，也不会让空间显得冷清。墙上挂着一些手绘的明信片，每一张都不一样。</p><p>以后应该会常来。</p>',hasImage:true,imageUrl:'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800'},
+{id:8,title:'雨季',date:'2026-05-15',category:'随笔',tags:['生活','雨季'],status:'published',
+summary:'连续下了一周的雨。窗外的世界变得朦胧，空气里都是湿润的泥土味道。',
+content:'<p>连续下了一周的雨。窗外的世界变得朦胧，空气里都是湿润的泥土味道。</p><p>雨声很适合当背景音。沙沙的，不吵不闹，反而让人更专注。这几天工作效率意外地高，也许是因为下雨天懒得出门，只能待在桌前。</p><p>想起一句诗——</p><blockquote>黄梅时节家家雨，青草池塘处处蛙。</blockquote><p>虽然这里没有池塘也没有蛙，但那种被雨水包裹的感觉，大概是一样的。</p><p>等天晴了，想去爬一次山。</p>',hasImage:false,imageUrl:null}
+];
+
+function loadPosts() {
+const raw = localStorage.getItem(STORAGE_KEY);
+if (raw) {
+try { return JSON.parse(raw); } catch(e) {}
+}
+// First time: save defaults
+savePosts(DEFAULT_POSTS);
+return DEFAULT_POSTS;
+}
+
+function savePosts(posts) {
+localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+}
+
+let POSTS = loadPosts();
+let userRole = null; // 'admin' | 'guest' | null
+
+// ===== State =====
+const PAGE_SIZE = 5;
+let currentPage = 'home';
+let currentHomePage = 1;
+let isSearchMode = false;
+let searchQuery = '';
+let lightboxImages = [];
+let lightboxIndex = 0;
+let editingPostId = null;
+let editorTags = [];
+let pendingImage = null; // base64 of image to insert
+
+// ===== Next ID =====
+function nextId() {
+if (POSTS.length === 0) return 1;
+return Math.max(...POSTS.map(p => p.id)) + 1;
+}
+
+// ===== Update Role Badge =====
+function updateRoleUI() {
+const badge = document.getElementById('roleBadge');
+const adminLink = document.querySelector('nav .links a.admin-link');
+if (userRole === 'admin') {
+badge.textContent = '管理员';
+badge.style.display = 'inline';
+adminLink.textContent = '管理';
+} else if (userRole === 'guest') {
+badge.textContent = '游客';
+badge.style.display = 'inline';
+adminLink.textContent = '登录';
+} else {
+badge.style.display = 'none';
+adminLink.textContent = '管理';
+}
+}
+
+// ===== Navigation =====
+function navigate(page, data) {
+closeSearch();
+document.querySelectorAll('nav .links a[data-page]').forEach(a => a.classList.remove('active'));
+const navLink = document.querySelector('nav .links a[data-page="' + page + '"]');
+if (navLink) navLink.classList.add('active');
+document.querySelectorAll('main > section').forEach(s => s.classList.remove('active'));
+const section = document.getElementById(page);
+if (section) section.classList.add('active');
+currentPage = page;
+isSearchMode = false;
+
+if (page === 'home') {
+renderPosts(POSTS.filter(p => p.status !== 'draft' || userRole === 'admin'), currentHomePage);
+} else if (page === 'post-detail' && data) {
+renderPostDetail(data);
+} else if (page === 'about') {
+renderAbout();
+} else if (page === 'album') {
+renderAlbum();
+} else if (page === 'archive') {
+renderArchive();
+} else if (page === 'admin') {
+renderAdmin();
+}
+window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== Render Post Cards =====
+function renderPosts(posts, page) {
+currentHomePage = page || 1;
+const start = (currentHomePage - 1) * PAGE_SIZE;
+const paged = posts.slice(start, start + PAGE_SIZE);
+const totalPages = Math.ceil(posts.length / PAGE_SIZE);
+
+const list = document.getElementById('postList');
+list.innerHTML = paged.map((p, i) => {
+const statusBadge = p.status === 'draft' ? '<span class="status-draft">草稿</span>' : '';
+return '<div class="post-card" onclick="navigate(\'post-detail\',' + p.id + ')" style="animation-delay:' + (i * 0.05) + 's"><div class="meta"><span>' + p.date + '</span><span class="category">' + p.category + '</span>' + statusBadge + (p.hasImage ? '<span>📷</span>' : '') + '</div><h2>' + highlightText(p.title, searchQuery) + '</h2><p class="summary">' + highlightText(p.summary, searchQuery) + '</p></div>';
+}).join('');
+
+const pagDiv = document.getElementById('pagination');
+if (totalPages <= 1) { pagDiv.innerHTML = ''; return; }
+let html = '<button ' + (currentHomePage === 1 ? 'disabled' : '') + ' onclick="goPage(' + (currentHomePage - 1) + ')">‹</button>';
+for (let i = 1; i <= totalPages; i++) {
+html += '<button class="' + (i === currentHomePage ? 'active' : '') + '" onclick="goPage(' + i + ')">' + i + '</button>';
+}
+html += '<button ' + (currentHomePage === totalPages ? 'disabled' : '') + ' onclick="goPage(' + (currentHomePage + 1) + ')">›</button>';
+pagDiv.innerHTML = html;
+}
+
+function goPage(p) {
+const posts = isSearchMode ? searchPosts(searchQuery) : POSTS.filter(p => p.status !== 'draft' || userRole === 'admin');
+renderPosts(posts, p);
+window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== Post Detail =====
+function renderPostDetail(id) {
+const post = POSTS.find(p => p.id === id);
+if (!post) return;
+const section = document.getElementById('post-detail');
+let adminHtml = '';
+if (userRole === 'admin') {
+adminHtml = '<div class="admin-actions"><button onclick="openEditor(' + post.id + ')">✏️ 编辑</button><button class="danger" onclick="deletePost(' + post.id + ')">🗑️ 删除</button></div>';
+}
+section.innerHTML = adminHtml + '<button class="back-btn" onclick="navigate(\'home\')">← 返回</button><h1>' + post.title + '</h1><div class="post-meta">' + post.date + ' · ' + post.category + ' ' + (post.status === 'draft' ? '· <span style="color:var(--danger)">草稿</span>' : '') + '<br>' + post.tags.map(t => ' #' + t).join('') + '</div><div class="post-body">' + post.content + '</div>';
+}
+
+// ===== Album =====
+function renderAlbum() {
+const imagePosts = POSTS.filter(p => p.hasImage && p.imageUrl && p.status === 'published');
+const grid = document.getElementById('albumGrid');
+const empty = document.getElementById('albumEmpty');
+if (imagePosts.length === 0) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+empty.style.display = 'none';
+lightboxImages = imagePosts.map(p => ({ url: p.imageUrl, title: p.title }));
+grid.innerHTML = imagePosts.map((p, i) => '<div class="album-item" onclick="openLightbox(' + i + ')"><img src="' + p.imageUrl + '" alt="' + p.title + '" loading="lazy"></div>').join('');
+}
+
+// ===== Lightbox =====
+function openLightbox(index) {
+lightboxIndex = index;
+document.getElementById('lightboxImg').src = lightboxImages[index].url;
+document.getElementById('lightbox').classList.add('open');
+document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+document.getElementById('lightbox').classList.remove('open');
+document.body.style.overflow = '';
+}
+function prevImage() {
+lightboxIndex = (lightboxIndex - 1 + lightboxImages.length) % lightboxImages.length;
+document.getElementById('lightboxImg').src = lightboxImages[lightboxIndex].url;
+}
+function nextImage() {
+lightboxIndex = (lightboxIndex + 1) % lightboxImages.length;
+document.getElementById('lightboxImg').src = lightboxImages[lightboxIndex].url;
+}
+document.addEventListener('keydown', (e) => {
+if (!document.getElementById('lightbox').classList.contains('open')) return;
+if (e.key === 'Escape') closeLightbox();
+if (e.key === 'ArrowLeft') prevImage();
+if (e.key === 'ArrowRight') nextImage();
+});
+
+// ===== Archive =====
+function renderArchive() {
+const grouped = {};
+POSTS.filter(p => p.status === 'published').forEach(p => {
+const ym = p.date.substring(0, 7);
+if (!grouped[ym]) grouped[ym] = [];
+grouped[ym].push(p);
+});
+const sortedKeys = Object.keys(grouped).sort().reverse();
+let html = '';
+sortedKeys.forEach(key => {
+const parts = key.split('-');
+html += '<div class="archive-group"><div class="archive-year">' + parts[0] + '年' + parseInt(parts[1]) + '月</div>';
+grouped[key].forEach(p => {
+html += '<div class="archive-item" onclick="navigate(\'post-detail\',' + p.id + ')"><span class="archive-date">' + p.date.substring(8) + '日</span><span class="archive-title">' + p.title + '</span></div>';
+});
+html += '</div>';
+});
+document.getElementById('archiveList').innerHTML = html;
+}
+
+// ===== Search =====
+function toggleSearch() {
+const box = document.getElementById('searchBox');
+const input = document.getElementById('searchInput');
+box.classList.toggle('open');
+if (box.classList.contains('open')) { setTimeout(() => input.focus(), 300); navigate('home'); }
+else { closeSearch(); }
+}
+function closeSearch() {
+document.getElementById('searchBox').classList.remove('open');
+document.getElementById('searchInput').value = '';
+searchQuery = '';
+isSearchMode = false;
+renderPosts(POSTS.filter(p => p.status !== 'draft' || userRole === 'admin'), 1);
+}
+function doSearch() {
+searchQuery = document.getElementById('searchInput').value.trim();
+if (!searchQuery) { isSearchMode = false; renderPosts(POSTS.filter(p => p.status !== 'draft' || userRole === 'admin'), 1); return; }
+isSearchMode = true;
+renderPosts(searchPosts(searchQuery), 1);
+}
+function searchPosts(query) {
+const q = query.toLowerCase();
+return POSTS.filter(p => p.title.toLowerCase().includes(q) || p.summary.toLowerCase().includes(q) || p.content.toLowerCase().includes(q) || p.tags.some(t => t.toLowerCase().includes(q)));
+}
+function highlightText(text, query) {
+if (!query) return text;
+const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+return text.replace(new RegExp('(' + escaped + ')', 'gi'), '<mark>$1</mark>');
+}
+
+// ===== Font Switching =====
+const FONTS = ['default', 'kai', 'song', 'sans', 'hei', 'fangsong', 'dengxian', 'lishu'];
+const FONT_NAMES = { default: '默认', kai: '楷体', song: '宋体', sans: '黑体', hei: '雅黑', fangsong: '仿宋', dengxian: '等线', lishu: '隶书' };
+const FONT_CLASSES = { kai: 'font-kai', song: 'font-song', sans: 'font-sans', hei: 'font-hei', fangsong: 'font-fangsong', dengxian: 'font-dengxian', lishu: 'font-lishu' };
+function switchFont() {
+  const body = document.body;
+  const allClasses = Object.values(FONT_CLASSES);
+  const current = FONTS.find(f => f === 'default' ? !allClasses.some(c => body.classList.contains(c)) : body.classList.contains(FONT_CLASSES[f]));
+  const idx = FONTS.indexOf(current);
+  const next = FONTS[(idx + 1) % FONTS.length];
+  body.classList.remove(...allClasses);
+  if (next !== 'default') body.classList.add(FONT_CLASSES[next]);
+  localStorage.setItem('blog-font', next);
+  document.querySelector('.font-switcher').textContent = FONT_NAMES[next] || '字体';
+}
+
+// ===== About Data =====
+const ABOUT_KEY = 'blog_about';
+const DEFAULT_ABOUT = {
+  avatarIcon: '🌿',
+  name: '关于我',
+  bio: '这里写一段自我介绍。可以聊聊你的兴趣、职业，或者为什么开始写这个博客。留白处等你来填。',
+  email: 'hello@example.com',
+  github: 'https://github.com'
+};
+function loadAbout() {
+  const raw = localStorage.getItem(ABOUT_KEY);
+  if (raw) {
+    try { return { ...DEFAULT_ABOUT, ...JSON.parse(raw) }; } catch(e) {}
+  }
+  saveAbout(DEFAULT_ABOUT);
+  return DEFAULT_ABOUT;
+}
+function saveAbout(data) {
+  localStorage.setItem(ABOUT_KEY, JSON.stringify(data));
+}
+function renderAbout() {
+  const data = loadAbout();
+  const container = document.getElementById('aboutContent');
+  container.innerHTML = '<div class="about-avatar">' + data.avatarIcon + '</div>'
+    + '<h1>' + escapeHtml(data.name) + '</h1>'
+    + '<p class="bio">' + escapeHtml(data.bio) + '</p>'
+    + '<div class="about-links">'
+    + '<a href="' + escapeHtml(data.github) + '" target="_blank">GitHub</a>'
+    + '<a href="mailto:' + escapeHtml(data.email) + '">Email</a>'
+    + '</div>';
+}
+
+// ===== Login / Logout =====
+function showLoginTab(tab) {
+document.getElementById('tabAdmin').classList.toggle('active', tab === 'admin');
+document.getElementById('tabGuest').classList.toggle('active', tab === 'guest');
+document.getElementById('adminLoginForm').style.display = tab === 'admin' ? 'block' : 'none';
+document.getElementById('guestLoginForm').style.display = tab === 'guest' ? 'block' : 'none';
+}
+
+function adminLogin() {
+const pw = document.getElementById('adminPassword').value;
+const storedPw = localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_PW;
+if (pw === storedPw) {
+userRole = 'admin';
+document.getElementById('adminLogin').style.display = 'none';
+document.getElementById('adminDashboard').style.display = 'block';
+document.getElementById('adminPanel').style.display = 'block';
+document.getElementById('guestInfo').style.display = 'none';
+updateRoleUI();
+renderAdminDashboard();
+showToast('管理员登录成功 ✅');
+} else {
+document.getElementById('loginError').textContent = '密码错误，请重试';
+}
+}
+
+function guestLogin() {
+userRole = 'guest';
+document.getElementById('adminLogin').style.display = 'none';
+document.getElementById('adminDashboard').style.display = 'block';
+document.getElementById('adminPanel').style.display = 'none';
+document.getElementById('guestInfo').style.display = 'block';
+updateRoleUI();
+navigate('home');
+showToast('游客模式，欢迎浏览 🌿');
+}
+
+function logout() {
+userRole = null;
+document.getElementById('adminLogin').style.display = 'block';
+document.getElementById('adminDashboard').style.display = 'none';
+document.getElementById('adminPassword').value = '';
+document.getElementById('loginError').textContent = '';
+showLoginTab('admin');
+updateRoleUI();
+navigate('home');
+}
+
+function renderAdmin() {
+if (userRole === 'admin') {
+document.getElementById('adminLogin').style.display = 'none';
+document.getElementById('adminDashboard').style.display = 'block';
+document.getElementById('adminPanel').style.display = 'block';
+document.getElementById('guestInfo').style.display = 'none';
+renderAdminDashboard();
+} else if (userRole === 'guest') {
+document.getElementById('adminLogin').style.display = 'none';
+document.getElementById('adminDashboard').style.display = 'block';
+document.getElementById('adminPanel').style.display = 'none';
+document.getElementById('guestInfo').style.display = 'block';
+} else {
+document.getElementById('adminLogin').style.display = 'block';
+document.getElementById('adminDashboard').style.display = 'none';
+document.getElementById('adminPassword').value = '';
+document.getElementById('loginError').textContent = '';
+showLoginTab('admin');
+}
+}
+
+function renderAdminDashboard() {
+POSTS = loadPosts();
+const total = POSTS.length;
+const published = POSTS.filter(p => p.status === 'published').length;
+const drafts = POSTS.filter(p => p.status === 'draft').length;
+document.getElementById('statTotal').textContent = total;
+document.getElementById('statPublished').textContent = published;
+document.getElementById('statDrafts').textContent = drafts;
+
+const list = document.getElementById('adminPostList');
+if (POSTS.length === 0) {
+list.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:40px">还没有文章，点击"写新文章"开始吧 ✍️</p>';
+return;
+}
+list.innerHTML = POSTS.sort((a,b) => b.id - a.id).map(p => {
+const statusLabel = p.status === 'draft' ? '<span style="color:var(--danger);font-size:12px">[草稿]</span>' : '';
+return '<div class="admin-post-item"><div class="info"><div class="title" onclick="navigate(\'post-detail\',' + p.id + ')">' + statusLabel + ' ' + p.title + '</div><div class="meta">' + p.date + ' · ' + p.category + ' · ' + p.tags.join(', ') + '</div></div><div class="actions"><button onclick="openEditor(' + p.id + ')">✏️ 编辑</button><button class="danger" onclick="deletePost(' + p.id + ')">🗑️</button></div></div>';
+}).join('');
+}
+
+function deletePost(id) {
+if (!confirm('确定要删除这篇文章吗？此操作不可恢复。')) return;
+POSTS = POSTS.filter(p => p.id !== id);
+savePosts(POSTS);
+renderAdminDashboard();
+showToast('文章已删除');
+}
+
+// ===== Editor =====
+function openEditor(id) {
+if (userRole !== 'admin') { showToast('请先登录管理后台', 'error'); return; }
+editingPostId = id || null;
+editorTags = [];
+pendingImage = null;
+
+const post = id ? POSTS.find(p => p.id === id) : null;
+const title = post ? '编辑文章' : '写新文章';
+
+let html = '<h3>' + title + '</h3>';
+html += '<div class="editor-field"><label>标题</label><input type="text" id="edTitle" value="' + (post ? escapeHtml(post.title) : '') + '" placeholder="输入文章标题"></div>';
+html += '<div style="display:flex;gap:12px"><div class="editor-field" style="flex:1"><label>日期</label><input type="date" id="edDate" value="' + (post ? post.date : todayStr()) + '"></div><div class="editor-field" style="flex:1"><label>分类</label><select id="edCategory"><option value="随笔">随笔</option><option value="技术">技术</option><option value="摄影">摄影</option><option value="读书">读书</option><option value="旅行">旅行</option><option value="其他">其他</option></select></div></div>';
+html += '<div class="editor-field"><label>摘要</label><textarea id="edSummary" placeholder="简短描述这篇文章…">' + (post ? escapeHtml(post.summary) : '') + '</textarea></div>';
+html += '<div class="editor-field"><label>标签</label><div class="tag-input-wrap" id="tagWrap"><span id="tagChips"></span><input type="text" id="tagInput" placeholder="输入标签后按回车" onkeydown="handleTagKey(event)"></div></div>';
+html += '<div class="editor-field"><label>状态</label><select id="edStatus"><option value="published">发布</option><option value="draft">草稿</option></select></div>';
+html += '<div class="editor-field"><label>正文</label><div class="rt-toolbar"><button onclick="execCmd(\'bold\')\" title="加粗"><b>B</b></button><button onclick="execCmd(\'italic\')\" title="斜体"><i>I</i></button><button onclick="execCmd(\'underline\')\" title="下划线"><u>U</u></button><span class="sep"></span><button onclick="execCmd(\'formatBlock\',\'h2\')\">H2</button><button onclick="execCmd(\'formatBlock\',\'h3\')\">H3</button><button onclick="execCmd(\'formatBlock\',\'p\')\">P</button><span class="sep"></span><button onclick="execCmd(\'insertUnorderedList\')\">• 列表</button><button onclick="execCmd(\'insertOrderedList\')\">1. 列表</button><button onclick="execCmd(\'formatBlock\',\'blockquote\')\">❝ 引用</button><span class="sep"></span><button onclick="triggerImageUpload()">🖼️ 插入图片</button></div><div class="rt-body" id="rtBody" contenteditable="true"></div><div class="img-upload-area" id="imgUploadArea" onclick="document.getElementById(\'imgFileInput\').click()"><div class="hint">📁 点击这里上传图片，或粘贴图片到正文中</div></div><input type="file" id="imgFileInput" style="display:none" accept="image/*" onchange="handleImageUpload(event)"></div>';
+html += '<div class="editor-actions"><button onclick="closeEditor()">取消</button><button class="btn-primary" onclick="savePost()">💾 保存</button></div>';
+
+document.getElementById('editorPanel').innerHTML = html;
+document.getElementById('editorOverlay').classList.add('open');
+
+// Set category
+if (post) {
+const catSel = document.getElementById('edCategory');
+if (catSel) {
+for (let i = 0; i < catSel.options.length; i++) {
+if (catSel.options[i].value === post.category) { catSel.selectedIndex = i; break; }
+}
+}
+document.getElementById('edStatus').value = post.status;
+}
+
+// Load existing tags
+if (post && post.tags) {
+editorTags = post.tags.slice();
+renderTagChips();
+}
+
+// Set body content
+const rtBody = document.getElementById('rtBody');
+if (post) {
+rtBody.innerHTML = post.content;
+} else {
+rtBody.innerHTML = '<p>开始写你的内容…</p>';
+}
+rtBody.focus();
+
+// Click overlay background to close
+document.getElementById('editorOverlay').onclick = function(e) {
+if (e.target === this) closeEditor();
+};
+}
+
+function escapeHtml(str) {
+if (!str) return '';
+return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function todayStr() {
+const d = new Date();
+return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function handleTagKey(e) {
+if (e.key === 'Enter') {
+e.preventDefault();
+const input = document.getElementById('tagInput');
+const val = input.value.trim();
+if (val && !editorTags.includes(val)) {
+editorTags.push(val);
+renderTagChips();
+}
+input.value = '';
+}
+}
+
+function removeTag(tag) {
+editorTags = editorTags.filter(t => t !== tag);
+renderTagChips();
+}
+
+function renderTagChips() {
+const container = document.getElementById('tagChips');
+container.innerHTML = editorTags.map(t => '<span class="tag-chip">' + t + '<span class="remove" onclick="removeTag(\'' + t + '\')">×</span></span>').join('');
+}
+
+function execCmd(cmd, val) {
+document.getElementById('rtBody').focus();
+document.execCommand(cmd, false, val || null);
+}
+
+function triggerImageUpload() {
+document.getElementById('imgFileInput').click();
+}
+
+function handleImageUpload(event) {
+const file = event.target.files[0];
+if (!file) return;
+const reader = new FileReader();
+reader.onload = function(e) {
+const dataUrl = e.target.result;
+// Insert into editor
+const rtBody = document.getElementById('rtBody');
+rtBody.focus();
+document.execCommand('insertHTML', false, '<br><img src="' + dataUrl + '" alt="上传图片"><br>');
+// Show preview in upload area
+document.getElementById('imgUploadArea').innerHTML = '<img src="' + dataUrl + '" alt="预览"><div class="hint">图片已插入正文 📁</div>';
+};
+reader.readAsDataURL(file);
+}
+
+function closeEditor() {
+document.getElementById('editorOverlay').classList.remove('open');
+editingPostId = null;
+editorTags = [];
+}
+
+// ===== Password Change =====
+function openPasswordEditor() {
+  if (userRole !== 'admin') { showToast('请先登录管理后台', 'error'); return; }
+  const panel = document.getElementById('editorPanel');
+  panel.innerHTML = '<h3>🔑 修改管理密码</h3>'
+    + '<div class="editor-field"><label>当前密码</label><input type="password" id="pwOld" placeholder="输入当前密码"></div>'
+    + '<div class="editor-field"><label>新密码</label><input type="password" id="pwNew" placeholder="输入新密码（至少6位）"></div>'
+    + '<div class="editor-field"><label>确认新密码</label><input type="password" id="pwConfirm" placeholder="再次输入新密码"></div>'
+    + '<div class="editor-actions">'
+    + '<button onclick="closeEditor()">取消</button>'
+    + '<button class="btn-primary" onclick="savePassword()">💾 保存密码</button>'
+    + '</div>';
+  document.getElementById('editorOverlay').classList.add('open');
+  document.getElementById('editorOverlay').onclick = function(e) {
+    if (e.target === this) closeEditor();
+  };
+}
+function savePassword() {
+  const old = document.getElementById('pwOld').value;
+  const pw = document.getElementById('pwNew').value;
+  const confirm = document.getElementById('pwConfirm').value;
+  const storedPw = localStorage.getItem(ADMIN_PW_KEY) || DEFAULT_PW;
+  if (old !== storedPw) { showToast('当前密码错误', 'error'); return; }
+  if (pw.length < 6) { showToast('新密码至少6位', 'error'); return; }
+  if (pw !== confirm) { showToast('两次输入的密码不一致', 'error'); return; }
+  localStorage.setItem(ADMIN_PW_KEY, pw);
+  closeEditor();
+  showToast('密码修改成功 ✅');
+}
+
+// ===== About Editor =====
+function openAboutEditor() {
+  if (userRole !== 'admin') { showToast('请先登录管理后台', 'error'); return; }
+  const data = loadAbout();
+  const panel = document.getElementById('editorPanel');
+  panel.innerHTML = '<h3>👤 编辑关于页面</h3>'
+    + '<div class="editor-field"><label>头像图标（支持 Emoji）</label><input type="text" id="abAvatar" value="' + escapeHtml(data.avatarIcon) + '" placeholder="例如：🌿"></div>'
+    + '<div class="editor-field"><label>页面标题</label><input type="text" id="abName" value="' + escapeHtml(data.name) + '" placeholder="关于我"></div>'
+    + '<div class="editor-field"><label>个人简介</label><textarea id="abBio" rows="4" placeholder="介绍一下自己…">' + escapeHtml(data.bio) + '</textarea></div>'
+    + '<div style="display:flex;gap:12px"><div class="editor-field" style="flex:1"><label>GitHub 链接</label><input type="url" id="abGithub" value="' + escapeHtml(data.github) + '" placeholder="https://github.com/xxx"></div>'
+    + '<div class="editor-field" style="flex:1"><label>邮箱地址</label><input type="email" id="abEmail" value="' + escapeHtml(data.email) + '" placeholder="hello@example.com"></div></div>'
+    + '<div class="editor-actions">'
+    + '<button onclick="closeEditor()">取消</button>'
+    + '<button class="btn-primary" onclick="saveAboutData()">💾 保存</button>'
+    + '</div>';
+  document.getElementById('editorOverlay').classList.add('open');
+  document.getElementById('editorOverlay').onclick = function(e) {
+    if (e.target === this) closeEditor();
+  };
+}
+function saveAboutData() {
+  const data = {
+    avatarIcon: document.getElementById('abAvatar').value.trim() || '🌿',
+    name: document.getElementById('abName').value.trim() || '关于我',
+    bio: document.getElementById('abBio').value.trim() || '',
+    email: document.getElementById('abEmail').value.trim() || '',
+    github: document.getElementById('abGithub').value.trim() || ''
+  };
+  saveAbout(data);
+  closeEditor();
+  showToast('关于页面已更新 ✅');
+  if (currentPage === 'about') renderAbout();
+}
+
+function savePost() {
+const title = document.getElementById('edTitle').value.trim();
+const date = document.getElementById('edDate').value;
+const category = document.getElementById('edCategory').value;
+const summary = document.getElementById('edSummary').value.trim();
+const status = document.getElementById('edStatus').value;
+const content = document.getElementById('rtBody').innerHTML;
+
+if (!title) { showToast('请输入标题', 'error'); return; }
+if (!summary) { showToast('请输入摘要', 'error'); return; }
+
+// Extract first image URL from content
+const imgMatch = content.match(/<img[^>]+src="([^"]+)"/i);
+const hasImage = !!imgMatch;
+const imageUrl = hasImage ? imgMatch[1] : null;
+
+if (editingPostId) {
+// Update existing
+const idx = POSTS.findIndex(p => p.id === editingPostId);
+if (idx >= 0) {
+POSTS[idx] = { ...POSTS[idx], title, date, category, tags: editorTags, status, summary, content, hasImage, imageUrl };
+}
+} else {
+// Create new
+const newPost = {
+id: nextId(),
+title, date, category,
+tags: editorTags,
+status, summary, content,
+hasImage, imageUrl
+};
+POSTS.unshift(newPost);
+}
+
+savePosts(POSTS);
+closeEditor();
+renderAdminDashboard();
+showToast(editingPostId ? '文章已更新 ✅' : '文章已发布 ✅');
+
+// Refresh home if visible
+if (currentPage === 'home') {
+renderPosts(POSTS.filter(p => p.status !== 'draft' || userRole === 'admin'), currentHomePage);
+}
+}
+
+// ===== Import/Export =====
+function exportData() {
+const blob = new Blob([JSON.stringify(POSTS, null, 2)], {type: 'application/json'});
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = 'blog-backup-' + todayStr() + '.json';
+a.click();
+URL.revokeObjectURL(url);
+showToast('数据已导出');
+}
+
+function importData() {
+document.getElementById('importFile').click();
+}
+
+function handleImport(event) {
+const file = event.target.files[0];
+if (!file) return;
+const reader = new FileReader();
+reader.onload = function(e) {
+try {
+const data = JSON.parse(e.target.result);
+if (!Array.isArray(data)) throw new Error('格式错误');
+if (!confirm('导入将覆盖现有 ' + POSTS.length + ' 篇文章，确认导入 ' + data.length + ' 篇？')) return;
+POSTS = data;
+savePosts(POSTS);
+renderAdminDashboard();
+showToast('已导入 ' + data.length + ' 篇文章');
+} catch(err) {
+showToast('导入失败：文件格式不正确', 'error');
+}
+};
+reader.readAsText(file);
+event.target.value = '';
+}
+
+function resetAllData() {
+if (!confirm('确定要删除所有文章数据吗？此操作不可恢复！')) return;
+if (!confirm('再次确认：真的要清空所有文章吗？')) return;
+POSTS = [];
+savePosts(POSTS);
+renderAdminDashboard();
+showToast('所有数据已清空');
+}
+
+// ===== Toast =====
+function showToast(msg, type) {
+const toast = document.getElementById('toast');
+toast.textContent = msg;
+toast.className = 'toast ' + (type || '');
+setTimeout(() => toast.classList.add('show'), 10);
+setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ===== Init =====
+(function init() {
+POSTS = loadPosts();
+const savedFont = localStorage.getItem('blog-font');
+if (savedFont && savedFont !== 'default') {
+document.body.classList.add(FONT_CLASSES[savedFont]);
+}
+document.querySelector('.font-switcher').textContent = FONT_NAMES[savedFont] || '字体';
+updateRoleUI();
+navigate('home');
+})();
+</script>
+</body>
+</html>
